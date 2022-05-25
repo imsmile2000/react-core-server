@@ -1,19 +1,19 @@
 const express = require("express"); 
-const cors = require('cors');
-
 const app = express();
-
 const mysql = require("mysql"); 
-const PORT = process.env.port || 8080; 
+const PORT = process.env.port || 8080 ; 
+
+const cors = require('cors');
 const bodyParser = require("body-parser");
 
 let corsOptions = { 
     origin: "*",
     credential: true, 
 };
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(cors(corsOptions));
 app.use(express.json()); 
-app.use(bodyParser.urlencoded({ extended: true }));
 
 const db = mysql.createPool({
     host: "localhost",
@@ -43,23 +43,35 @@ app.get("/list", (req, res) => {
 app.post("/insert", (req, res) => { 
     var title = req.body.title; 
     var content = req.body.content; 
-    
+    var member_name=req.body.member_name;
+    var random_password=req.body.random_password;
     const sqlQuery = 
-    "INSERT INTO BOARD (TITLE, CONTENT, MEMBER_NAME) VALUES (?,?,yoon);"; 
-    db.query(sqlQuery, [title, content], (err, result) => { 
-        res.send(result); 
+    "INSERT INTO BOARD (TITLE, CONTENT, MEMBER_NAME, RANDOM_PASSWORD) VALUES (?,?,?,?)"; 
+    db.query(sqlQuery, [title, content,member_name,random_password], (err, result) => {
+        if(err) return console.log(err);
+        if(result) res.send(result); 
     }); 
 }); 
 
 app.post("/update", (req, res) => { 
     var title = req.body.title; 
     var content = req.body.content; 
-    
+    var member_name=req.body.member_name;
+    var random_password=req.body.random_password;
     const sqlQuery = 
-    "UPDATE BOARD SET (TITLE = ?, CONTENT = ?,UPDATER_MEMBER_NAME) FROM (?,?,yoon);"; 
-    db.query(sqlQuery, [title, content], (err, result) => { 
-        res.send(result); 
+    "UPDATE BOARD SET (TITLE = ?, CONTENT = ?,MEMBER_NAME=?,RANDOM_PASSWORD) FROM (?,?,?,?);"; 
+    db.query(sqlQuery, [title, content,member_name,random_password], (err, result) => { 
+        if(err) return console.log(err);
+        if(result) res.send(result);
     }); 
+});
+
+app.post("/delete", (req, res) => { 
+    const id = req.body.boardIdList; // 6,5
+    const sqlQuery = `DELETE FROM BOARD WHERE BOARD_ID IN (${id})`;
+    db.query(sqlQuery, (err, result) => {
+    res.send(result);
+  });
 });
 
 
